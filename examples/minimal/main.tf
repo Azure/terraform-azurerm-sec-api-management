@@ -23,8 +23,7 @@ module "apim" {
   # API Management
   apim_publisher_name  = "John Doe"
   apim_publisher_email = "john@doe.com"
-  apim_sku             = "Developer_1"
 
-  apim_policies_path          = "../../policies.xml"
+  apim_policies_path          = "../../apim_policies/policies.xml"
   enable_authorization_server = false
 }

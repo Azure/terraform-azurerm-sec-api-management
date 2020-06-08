@@ -108,7 +108,7 @@ module "apim" {
   apim_virtual_network_resource_group_name = azurerm_resource_group.test_group.name
 
   # APIs
-  apim_policies_path = "../../policies.xml"
+  apim_policies_path = "../../apim_policies/policies.xml"
   certificates       = []
 
   # Authorization

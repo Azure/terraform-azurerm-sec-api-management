@@ -27,6 +27,12 @@ variable "suffix" {
   default     = []
 }
 
+variable "apim_sku" {
+  type        = string
+  description = "The Azure API Management SKU"
+  default     = "Developer_1"
+}
+
 variable "apim_virtual_network_type" {
   type        = string
   description = "The virtual network type for the Azure API Management to use (valid: None, Internal, External)"
@@ -54,13 +60,7 @@ variable "apim_virtual_network_subnet_name" {
 variable "apim_policies_path" {
   type        = string
   description = "Path to a file defining the Azure API Management policies in XML"
-  default     = "policies.xml"
-}
-
-variable "apim_sku" {
-  type        = string
-  description = "The Azure API Management SKU"
-  default     = "Developer_1"
+  default     = ""
 }
 
 variable "certificates" {
