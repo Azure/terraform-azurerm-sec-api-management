@@ -93,8 +93,8 @@ resource "azurerm_key_vault_secret" "test_group" {
 module "apim" {
   source              = "../../"
   resource_group_name = azurerm_resource_group.test_group.name
-  prefix              = local.prefix
-  suffix              = local.suffix
+  prefix              = [local.unique_name_stub]
+  suffix              = [local.unique_name_stub]
 
   # API Management
   apim_publisher_name  = "John Doe"
@@ -130,8 +130,8 @@ module "apim" {
 resource "azurerm_key_vault_access_policy" "apim" {
   key_vault_id = azurerm_key_vault.test_group.id
 
-  tenant_id = module.apim.apim_identity[0].tenant_id
-  object_id = module.apim.apim_identity[0].principal_id
+  tenant_id = module.apim.api_management.identity[0].tenant_id
+  object_id = module.apim.api_management.identity[0].principal_id
 
   secret_permissions = [
     "get",
