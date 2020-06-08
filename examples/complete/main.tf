@@ -59,6 +59,7 @@ resource "azurerm_key_vault" "test_group" {
       "getissuers",
       "setissuers",
       "update",
+      "delete"
     ]
 
     key_permissions = [
@@ -124,7 +125,7 @@ resource "azurerm_key_vault_certificate" "test_group" {
 
       subject_alternative_names {
         dns_names = [
-          "dev2.example.com",
+          "dev.example.com",
           "mgmt.example.com",
           "scm.example.com",
         "portal.example.com"]
@@ -186,7 +187,7 @@ module "apim" {
   apim_portal_negotiate_client_certificate = false
 
   # Dev Portal
-  apim_developer_portal_host_name                    = "dev2.example.com"
+  apim_developer_portal_host_name                    = "dev.example.com"
   apim_developer_portal_key_vault_id                 = azurerm_key_vault_certificate.test_group.secret_id
   apim_developer_portal_negotiate_client_certificate = false
 
