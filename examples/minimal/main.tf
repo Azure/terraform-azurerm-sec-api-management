@@ -4,11 +4,15 @@ provider "azurerm" {
 }
 
 module "naming" {
-  source = "git@github.com:Azure/terraform-azurerm-naming"
+  source = "git::https://github.com/Azure/terraform-azurerm-naming"
+}
+
+locals {
+  unique_name_stub = substr(module.naming.unique-seed, 0, 5)
 }
 
 resource "azurerm_resource_group" "test_group" {
-  name     = "${module.naming.resource_group.slug}-${module.naming.api_management.slug}-min-test-${substr(module.naming.unique-seed, 0, 5)}"
+  name     = "${module.naming.resource_group.slug}-${module.naming.api_management.slug}-min-test-${local.unique_name_stub}"
   location = "uksouth"
 }
 

@@ -3,18 +3,16 @@ provider "azurerm" {
   features {}
 }
 
-data "azurerm_client_config" "current" {}
-
 module "naming" {
-  source = "git@github.com:Azure/terraform-azurerm-naming"
+  source = "git::https://github.com/Azure/terraform-azurerm-naming"
 }
 
 locals {
-  apim_host_name = "example.com"
+  unique_name_stub = substr(module.naming.unique-seed, 0, 5)
 }
 
 resource "azurerm_resource_group" "test_group" {
-  name     = "${module.naming.resource_group.slug}-${module.naming.api_management.slug}-max-test-${substr(module.naming.unique-seed, 0, 5)}"
+  name     = "${module.naming.resource_group.slug}-${module.naming.api_management.slug}-max-test-${local.unique_name_stub}"
   location = "uksouth"
 }
 
@@ -95,6 +93,8 @@ resource "azurerm_key_vault_secret" "test_group" {
 module "apim" {
   source              = "../../"
   resource_group_name = azurerm_resource_group.test_group.name
+  prefix              = local.prefix
+  suffix              = local.suffix
 
   # API Management
   apim_publisher_name  = "John Doe"

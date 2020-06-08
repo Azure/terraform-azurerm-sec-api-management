@@ -41,7 +41,7 @@ locals {
 }
 
 module "naming" {
-  source = "git@github.com:Azure/terraform-azurerm-naming"
+  source = "git::https://github.com/Azure/terraform-azurerm-naming"
   suffix = var.suffix
   prefix = var.prefix
 }
