@@ -268,3 +268,15 @@ variable "apim_scm_negotiate_client_certificate" {
 variable "module_depends_on" {
   default = [""]
 }
+
+variable "apim_key_vault_name" {
+  type        = string
+  description = "The name of the source Azure Key Vault"
+  default     = ""
+}
+
+variable "apim_key_vault_resource_group_name" {
+  type        = string
+  description = "The name of the resource group containing the source Azure Key Vault"
+  default     = ""
+}
