@@ -1,5 +1,5 @@
 provider "azurerm" {
-  version = "~>2.0"
+  version = "~>2.13.0"
   features {}
 }
 
@@ -49,7 +49,27 @@ resource "azurerm_key_vault" "test_group" {
 
     secret_permissions = [
       "set",
-      "get"
+      "get",
+      "delete"
+    ]
+
+    certificate_permissions = [
+      "create",
+      "get",
+      "getissuers",
+      "setissuers",
+      "update",
+      "delete"
+    ]
+
+    key_permissions = [
+      "create",
+      "decrypt",
+      "encrypt",
+      "import",
+      "sign",
+      "update",
+      "verify",
     ]
   }
 
@@ -59,37 +79,65 @@ resource "azurerm_key_vault" "test_group" {
   }
 }
 
-resource "tls_private_key" "test_group" {
-  algorithm   = "ECDSA"
-  ecdsa_curve = "P384"
-}
-
-resource "tls_self_signed_cert" "test_group" {
-  key_algorithm   = "ECDSA"
-  private_key_pem = tls_private_key.test_group.private_key_pem
-
-  subject {
-    common_name  = "*.example.com"
-    organization = "ACME Examples, Inc"
-  }
-
-  validity_period_hours = 12
-
-  allowed_uses = [
-    "key_encipherment",
-    "digital_signature",
-    "server_auth",
-  ]
-}
-
-resource "azurerm_key_vault_secret" "test_group" {
-  name         = "apimcertificate"
-  value        = base64encode(tls_self_signed_cert.test_group.cert_pem)
+resource "azurerm_key_vault_certificate" "test_group" {
+  name         = "generated-cert"
   key_vault_id = azurerm_key_vault.test_group.id
+
+  certificate_policy {
+    issuer_parameters {
+      name = "Self"
+    }
+
+    key_properties {
+      exportable = true
+      key_size   = 2048
+      key_type   = "RSA"
+      reuse_key  = true
+    }
+
+    lifetime_action {
+      action {
+        action_type = "AutoRenew"
+      }
+
+      trigger {
+        days_before_expiry = 30
+      }
+    }
+
+    secret_properties {
+      content_type = "application/x-pkcs12"
+    }
+
+    x509_certificate_properties {
+      # Server Authentication = 1.3.6.1.5.5.7.3.1
+      # Client Authentication = 1.3.6.1.5.5.7.3.2
+      extended_key_usage = ["1.3.6.1.5.5.7.3.1"]
+
+      key_usage = [
+        "cRLSign",
+        "dataEncipherment",
+        "digitalSignature",
+        "keyAgreement",
+        "keyCertSign",
+        "keyEncipherment",
+      ]
+
+      subject_alternative_names {
+        dns_names = [
+          "dev.example.com",
+          "mgmt.example.com",
+          "scm.example.com",
+          "portal.example.com"
+        ]
+      }
+
+      subject            = "CN=*.example.com"
+      validity_in_months = 12
+    }
+  }
 }
 
-# UserAssigned identities cannot be used with Key Vault
-# https://feedback.azure.com/forums/248703-api-management/suggestions/38047561-support-for-user-assigned-managed-identity
 module "apim" {
   source              = "../../"
   resource_group_name = azurerm_resource_group.test_group.name
@@ -125,15 +173,30 @@ module "apim" {
 
   apim_identity_type = "SystemAssigned"
   apim_identity_ids  = []
-}
 
-resource "azurerm_key_vault_access_policy" "apim" {
-  key_vault_id = azurerm_key_vault.test_group.id
+  apim_key_vault_enabled             = true # This can not be dynamically resolved due to: https://github.com/hashicorp/terraform/issues/21634
+  apim_key_vault_name                = module.naming.key_vault.name_unique
+  apim_key_vault_resource_group_name = azurerm_resource_group.test_group.name
 
-  tenant_id = module.apim.api_management.identity[0].tenant_id
-  object_id = module.apim.api_management.identity[0].principal_id
+  # Management
+  apim_management_host_name                    = "mgmt.example.com"
+  apim_management_key_vault_id                 = azurerm_key_vault_certificate.test_group.secret_id
+  apim_management_negotiate_client_certificate = false
 
-  secret_permissions = [
-    "get",
-  ]
+  # Portal
+  apim_portal_host_name                    = "portal.example.com"
+  apim_portal_key_vault_id                 = azurerm_key_vault_certificate.test_group.secret_id
+  apim_portal_negotiate_client_certificate = false
+
+  # Dev Portal
+  apim_developer_portal_host_name                    = "dev.example.com"
+  apim_developer_portal_key_vault_id                 = azurerm_key_vault_certificate.test_group.secret_id
+  apim_developer_portal_negotiate_client_certificate = false
+
+  # SCM
+  apim_scm_host_name                    = "scm.example.com"
+  apim_scm_key_vault_id                 = azurerm_key_vault_certificate.test_group.secret_id
+  apim_scm_negotiate_client_certificate = false
+
+  module_depends_on = []
 }
