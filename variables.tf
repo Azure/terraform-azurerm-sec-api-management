@@ -154,19 +154,7 @@ variable "apim_management_host_name" {
 variable "apim_management_key_vault_id" {
   type        = string
   description = "The ID of the Azure Key Vault secret containing the certificate"
-  default     = ""
-}
-
-variable "apim_management_certificate" {
-  type        = string
-  description = "The Base64 Encoded Certificate"
-  default     = ""
-}
-
-variable "apim_management_certificate_password" {
-  type        = string
-  description = "The password associated with the certificate provided above"
-  default     = ""
+  default     = "-"
 }
 
 variable "apim_management_negotiate_client_certificate" {
@@ -184,19 +172,7 @@ variable "apim_portal_host_name" {
 variable "apim_portal_key_vault_id" {
   type        = string
   description = "The ID of the Azure Key Vault secret containing the certificate"
-  default     = ""
-}
-
-variable "apim_portal_certificate" {
-  type        = string
-  description = "The Base64 Encoded Certificate"
-  default     = ""
-}
-
-variable "apim_portal_certificate_password" {
-  type        = string
-  description = "The password associated with the certificate provided above"
-  default     = ""
+  default     = "-"
 }
 
 variable "apim_portal_negotiate_client_certificate" {
@@ -211,22 +187,10 @@ variable "apim_developer_portal_host_name" {
   default     = ""
 }
 
-variable "apim_developer_portal_certificate" {
-  type        = string
-  description = "The Base64 Encoded Certificate"
-  default     = ""
-}
-
 variable "apim_developer_portal_key_vault_id" {
   type        = string
   description = "The ID of the Azure Key Vault secret containing the certificate"
-  default     = ""
-}
-
-variable "apim_developer_portal_certificate_password" {
-  type        = string
-  description = "The password associated with the certificate provided above"
-  default     = ""
+  default     = "-"
 }
 
 variable "apim_developer_portal_negotiate_client_certificate" {
@@ -244,19 +208,7 @@ variable "apim_scm_host_name" {
 variable "apim_scm_key_vault_id" {
   type        = string
   description = "The ID of the Azure Key Vault secret containing the certificate"
-  default     = ""
-}
-
-variable "apim_scm_certificate" {
-  type        = string
-  description = "The Base64 Encoded Certificate"
-  default     = ""
-}
-
-variable "apim_scm_certificate_password" {
-  type        = string
-  description = "The password associated with the certificate provided above"
-  default     = ""
+  default     = "-"
 }
 
 variable "apim_scm_negotiate_client_certificate" {

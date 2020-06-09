@@ -14,11 +14,6 @@ locals {
   apim_vnet_type                      = var.apim_virtual_network_type
   apim_vnet_enabled                   = local.apim_vnet_type != "None"
   apim_identity_enabled               = var.apim_identity_type != ""
-  apim_management_cert_enabled        = var.apim_management_host_name != "" && var.apim_management_certificate != "" && var.apim_management_certificate_password != ""
-  apim_portal_cert_enabled            = var.apim_portal_host_name != "" && var.apim_portal_certificate != "" && var.apim_portal_certificate_password != ""
-  apim_developer_portal_cert_enabled  = var.apim_developer_portal_host_name != "" && var.apim_developer_portal_certificate != "" && var.apim_developer_portal_certificate_password != ""
-  apim_scm_cert_enabled               = var.apim_scm_host_name != "" && var.apim_scm_certificate != "" && var.apim_scm_certificate_password != ""
-  hostname_configuration_cert_enabled = local.apim_management_cert_enabled || local.apim_developer_portal_cert_enabled || local.apim_portal_cert_enabled || local.apim_scm_cert_enabled
 }
 
 module "naming" {
@@ -78,56 +73,6 @@ resource "azurerm_api_management" "apim" {
     xml_content = file(var.apim_policies_path)
   }
 
-  dynamic "hostname_configuration" {
-    for_each = local.hostname_configuration_cert_enabled ? [1] : []
-
-    content {
-      dynamic "management" {
-        for_each = local.apim_management_cert_enabled ? [1] : []
-
-        content {
-          host_name                    = length(var.apim_management_host_name) > 0 ? var.apim_management_host_name : null
-          certificate                  = length(var.apim_management_certificate) > 0 ? var.apim_management_certificate : null
-          certificate_password         = length(var.apim_management_certificate_password) > 0 ? var.apim_management_certificate_password : null
-          negotiate_client_certificate = var.apim_management_negotiate_client_certificate
-        }
-      }
-
-      dynamic "portal" {
-        for_each = local.apim_portal_cert_enabled ? [1] : []
-
-        content {
-          host_name                    = length(var.apim_portal_host_name) > 0 ? var.apim_portal_host_name : null
-          certificate                  = length(var.apim_portal_certificate) > 0 ? var.apim_portal_certificate : null
-          certificate_password         = length(var.apim_portal_certificate_password) > 0 ? var.apim_portal_certificate_password : null
-          negotiate_client_certificate = var.apim_portal_negotiate_client_certificate
-        }
-      }
-
-      dynamic "developer_portal" {
-        for_each = local.apim_developer_portal_cert_enabled ? [1] : []
-
-        content {
-          host_name                    = length(var.apim_developer_portal_host_name) > 0 ? var.apim_developer_portal_host_name : null
-          certificate                  = length(var.apim_developer_portal_certificate) > 0 ? var.apim_developer_portal_certificate : null
-          certificate_password         = length(var.apim_developer_portal_certificate_password) > 0 ? var.apim_developer_portal_certificate_password : null
-          negotiate_client_certificate = var.apim_developer_portal_negotiate_client_certificate
-        }
-      }
-
-      dynamic "scm" {
-        for_each = local.apim_scm_cert_enabled ? [1] : []
-
-        content {
-          host_name                    = length(var.apim_scm_host_name) > 0 ? var.apim_scm_host_name : null
-          certificate                  = length(var.apim_scm_certificate) > 0 ? var.apim_scm_certificate : null
-          certificate_password         = length(var.apim_scm_certificate_password) > 0 ? var.apim_scm_certificate_password : null
-          negotiate_client_certificate = var.apim_scm_negotiate_client_certificate
-        }
-      }
-    }
-  }
-
   depends_on = [null_resource.module_depends_on]
 }
 
@@ -146,7 +91,10 @@ resource "azurerm_key_vault_access_policy" "apim" {
 
 # TODO: Remove once UserAssigned MSI work with APIM + KeyVault
 resource "null_resource" "apim" {
-  depends_on = [azurerm_key_vault_access_policy.apim]
+  depends_on = [
+    azurerm_key_vault_access_policy.apim,
+    azurerm_api_management.apim
+  ]
 
   triggers = {
     apim_name                         = azurerm_api_management.apim.name
@@ -163,8 +111,6 @@ resource "null_resource" "apim" {
     apim_scm_host                     = var.apim_scm_host_name
     apim_scm_kv_id                    = var.apim_scm_key_vault_id
     apim_scm_client_cert              = var.apim_scm_negotiate_client_certificate
-
-    count = var.apim_key_vault_enabled ? 1 : 0
   }
 
   provisioner "local-exec" {
@@ -186,6 +132,8 @@ resource "null_resource" "apim" {
       var.apim_scm_negotiate_client_certificate
     )
   }
+
+  count = var.apim_key_vault_enabled ? 1 : 0
 }
 
 resource "azurerm_api_management_authorization_server" "apim" {

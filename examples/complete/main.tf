@@ -128,7 +128,8 @@ resource "azurerm_key_vault_certificate" "test_group" {
           "dev.example.com",
           "mgmt.example.com",
           "scm.example.com",
-        "portal.example.com"]
+          "portal.example.com"
+        ]
       }
 
       subject            = "CN=*.example.com"
@@ -173,7 +174,7 @@ module "apim" {
   apim_identity_ids  = []
 
   apim_key_vault_enabled             = true # This can not be dynamically resolved due to: https://github.com/hashicorp/terraform/issues/21634
-  apim_key_vault_name                = azurerm_key_vault.test_group.name
+  apim_key_vault_name                = module.naming.key_vault.name_unique
   apim_key_vault_resource_group_name = azurerm_resource_group.test_group.name
 
   # Management
