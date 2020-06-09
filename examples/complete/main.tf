@@ -172,9 +172,9 @@ module "apim" {
   apim_identity_type = "SystemAssigned"
   apim_identity_ids  = []
 
-  # Key Vault
+  apim_key_vault_enabled             = true # This can not be dynamically resolved due to: https://github.com/hashicorp/terraform/issues/21634
   apim_key_vault_name                = azurerm_key_vault.test_group.name
-  apim_key_vault_resource_group_name = azurerm_key_vault.test_group.resource_group_name
+  apim_key_vault_resource_group_name = azurerm_resource_group.test_group.name
 
   # Management
   apim_management_host_name                    = "mgmt.example.com"

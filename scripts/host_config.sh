@@ -34,28 +34,28 @@ fi
 CURR_CONFIG=$(az apim show -n ${APIM_SVC_NAME} -g ${APIM_RESOURCE_GROUP_NAME} --query 'hostnameConfigurations')
 
 if ! [ -z ${MGMT_HOST_NAME} ] && ! [ -z ${MGMT_KEY_VAULT_ID} ]; then
-    echo "Add management host configuration"
+    echo "Set management host configuration"
     MGMT_CONFIG="[{\"type\":\"Management\",\"hostName\":\"${MGMT_HOST_NAME}\",\"keyVaultId\":\"${MGMT_KEY_VAULT_ID}\",\"negotiateClientCertificate\":${MGMT_NEGOTIATE_CLIENT_CERT}, \"defaultSslBinding\": false}]"
     # MGMT_CONFIG takes precedence over existing values on conflict
     CURR_CONFIG=$(jq --argjson arr1 "$CURR_CONFIG" --argjson arr2 "$MGMT_CONFIG" -n '$arr2 + $arr1 | unique_by(.type)')
 fi
 
 if ! [ -z ${PORTAL_HOST_NAME} ] && ! [ -z ${PORTAL_KEY_VAULT_ID} ]; then
-    echo "Add portal host configuration"
+    echo "Set portal host configuration"
     PORTAL_CONFIG="[{\"type\":\"Portal\",\"hostName\":\"${PORTAL_HOST_NAME}\",\"keyVaultId\":\"${PORTAL_KEY_VAULT_ID}\",\"negotiateClientCertificate\":${PORTAL_NEGOTIATE_CLIENT_CERT}, \"defaultSslBinding\": false}]"
     # PORTAL_CONFIG takes precedence over existing values on conflict
     CURR_CONFIG=$(jq --argjson arr1 "$CURR_CONFIG" --argjson arr2 "$PORTAL_CONFIG" -n '$arr2 + $arr1 | unique_by(.type)')
 fi
 
 if ! [ -z ${DEVELOPER_PORTAL_HOST_NAME} ] && ! [ -z ${DEVELOPER_PORTAL_KEY_VAULT_ID} ]; then
-    echo "Add developer portal host configuration"
+    echo "Set developer portal host configuration"
     DEVELOPER_PORTAL_CONFIG="[{\"type\":\"DeveloperPortal\",\"hostName\":\"${DEVELOPER_PORTAL_HOST_NAME}\",\"keyVaultId\":\"${DEVELOPER_PORTAL_KEY_VAULT_ID}\",\"negotiateClientCertificate\":${DEVELOPER_PORTAL_NEGOTIATE_CLIENT_CERT}, \"defaultSslBinding\": false}]"
     # DEVELOPER_PORTAL_CONFIG takes precedence over existing values on conflict
     CURR_CONFIG=$(jq --argjson arr1 "$CURR_CONFIG" --argjson arr2 "$DEVELOPER_PORTAL_CONFIG" -n '$arr2 + $arr1 | unique_by(.type)')
 fi
 
 if ! [ -z ${SCM_HOST_NAME} ] && ! [ -z ${SCM_KEY_VAULT_ID} ]; then
-    echo "Add scm host configuration"
+    echo "Set scm host configuration"
     SCM_CONFIG="[{\"type\":\"Management\",\"hostName\":\"${SCM_HOST_NAME}\",\"keyVaultId\":\"${SCM_KEY_VAULT_ID}\",\"negotiateClientCertificate\":${SCM_NEGOTIATE_CLIENT_CERT}, \"defaultSslBinding\": false}]"
     # SCM_CONFIG takes precedence over existing values on conflict
     CURR_CONFIG=$(jq --argjson arr1 "$CURR_CONFIG" --argjson arr2 "$SCM_CONFIG" -n '$arr2 + $arr1 | unique_by(.type)')

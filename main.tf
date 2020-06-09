@@ -3,6 +3,7 @@ provider "azurerm" {
   features {}
 }
 
+# TODO: Remove once TF 0.13 introduced module depends_on
 resource "null_resource" "module_depends_on" {
   triggers = {
     value = "${length(var.module_depends_on)}"
@@ -18,7 +19,6 @@ locals {
   apim_developer_portal_cert_enabled  = var.apim_developer_portal_host_name != "" && var.apim_developer_portal_certificate != "" && var.apim_developer_portal_certificate_password != ""
   apim_scm_cert_enabled               = var.apim_scm_host_name != "" && var.apim_scm_certificate != "" && var.apim_scm_certificate_password != ""
   hostname_configuration_cert_enabled = local.apim_management_cert_enabled || local.apim_developer_portal_cert_enabled || local.apim_portal_cert_enabled || local.apim_scm_cert_enabled
-  key_vault_enabled                   = var.apim_key_vault_name != "" && var.apim_key_vault_resource_group_name != ""
 }
 
 module "naming" {
@@ -132,8 +132,6 @@ resource "azurerm_api_management" "apim" {
 }
 
 resource "azurerm_key_vault_access_policy" "apim" {
-  count = local.key_vault_enabled ? 1 : 0
-
   key_vault_id = data.azurerm_key_vault.keyvault[0].id
 
   tenant_id = azurerm_api_management.apim.identity[0].tenant_id
@@ -143,7 +141,32 @@ resource "azurerm_key_vault_access_policy" "apim" {
     "get",
   ]
 
-  # TODO: Remove once UserAssigned MSI work with APIM + KeyVault
+  count = var.apim_key_vault_enabled ? 1 : 0
+}
+
+# TODO: Remove once UserAssigned MSI work with APIM + KeyVault
+resource "null_resource" "apim" {
+  depends_on = [azurerm_key_vault_access_policy.apim]
+
+  triggers = {
+    apim_name                         = azurerm_api_management.apim.name
+    apim_rg_name                      = azurerm_api_management.apim.resource_group_name
+    apim_mgmt_host                    = var.apim_management_host_name
+    apim_mgmt_kv_id                   = var.apim_management_key_vault_id
+    apim_mgmt_client_cert             = var.apim_management_negotiate_client_certificate
+    apim_portal_host                  = var.apim_portal_host_name
+    apim_portal_kv_id                 = var.apim_portal_key_vault_id
+    apim_portal_client_cert           = var.apim_portal_negotiate_client_certificate
+    apim_developer_portal_host        = var.apim_developer_portal_host_name
+    apim_developer_portal_kv_id       = var.apim_developer_portal_key_vault_id
+    apim_developer_portal_client_cert = var.apim_developer_portal_negotiate_client_certificate
+    apim_scm_host                     = var.apim_scm_host_name
+    apim_scm_kv_id                    = var.apim_scm_key_vault_id
+    apim_scm_client_cert              = var.apim_scm_negotiate_client_certificate
+
+    count = var.apim_key_vault_enabled ? 1 : 0
+  }
+
   provisioner "local-exec" {
     command = format("%s/scripts/host_config.sh %s %s %s %s %s %s %s %s %s %s %s %s %s %s",
       path.module,
