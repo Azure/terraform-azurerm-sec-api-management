@@ -19,6 +19,7 @@ locals {
 module "naming" {
   source = "git::https://github.com/Azure/terraform-azurerm-naming"
   suffix = var.suffix
+  prefix = var.prefix
 }
 
 # UserAssigned identities are currently in preview but don't seem to be working

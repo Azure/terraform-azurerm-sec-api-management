@@ -141,6 +141,7 @@ resource "azurerm_key_vault_certificate" "test_group" {
 module "apim" {
   source              = "../../"
   resource_group_name = azurerm_resource_group.test_group.name
+  prefix              = [local.unique_name_stub]
   suffix              = [local.unique_name_stub]
 
   # API Management
