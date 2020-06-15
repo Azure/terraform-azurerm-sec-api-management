@@ -33,7 +33,7 @@ module "naming" {
 # - https://github.com/terraform-providers/terraform-provider-azurerm/issues/3635
 # - https://feedback.azure.com/forums/248703-api-management/suggestions/38047561-support-for-user-assigned-managed-identity
 resource "azurerm_api_management" "apim" {
-  name                = module.naming.api_management.name_unique
+  name                = module.naming.api_managment_service.name_unique
   location            = data.azurerm_resource_group.base.location
   resource_group_name = data.azurerm_resource_group.base.name
   publisher_name      = var.apim_publisher_name
