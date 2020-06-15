@@ -12,7 +12,7 @@ locals {
 }
 
 resource "azurerm_resource_group" "test_group" {
-  name     = "${module.naming.resource_group.slug}-${module.naming.api_management.slug}-min-test-${local.unique_name_stub}"
+  name     = "${module.naming.resource_group.slug}-${module.naming.api_managment_service.slug}-min-test-${local.unique_name_stub}"
   location = "uksouth"
 }
 
