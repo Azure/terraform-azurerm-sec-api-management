@@ -1,5 +1,5 @@
 provider "azurerm" {
-  version = "2.13.0"
+  version = "~>2.18"
   features {}
 }
 
@@ -11,9 +11,9 @@ resource "null_resource" "module_depends_on" {
 }
 
 locals {
-  apim_vnet_type                      = var.apim_virtual_network_type
-  apim_vnet_enabled                   = local.apim_vnet_type != "None"
-  apim_identity_enabled               = var.apim_identity_type != ""
+  apim_vnet_type        = var.apim_virtual_network_type
+  apim_vnet_enabled     = local.apim_vnet_type != "None"
+  apim_identity_enabled = var.apim_identity_type != ""
 }
 
 module "naming" {
