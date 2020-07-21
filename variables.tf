@@ -217,10 +217,6 @@ variable "apim_scm_negotiate_client_certificate" {
   default     = false
 }
 
-variable "module_depends_on" {
-  default = [""]
-}
-
 variable "apim_key_vault_enabled" {
   type        = string
   description = "Is Azure Key Vault enabled for certificate use"
