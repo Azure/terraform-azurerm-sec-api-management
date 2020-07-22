@@ -3,13 +3,6 @@ provider "azurerm" {
   features {}
 }
 
-# TODO: Remove once TF 0.13 introduced module depends_on
-resource "null_resource" "module_depends_on" {
-  triggers = {
-    value = "${length(var.module_depends_on)}"
-  }
-}
-
 locals {
   apim_vnet_type        = var.apim_virtual_network_type
   apim_vnet_enabled     = local.apim_vnet_type != "None"
@@ -73,8 +66,6 @@ resource "azurerm_api_management" "apim" {
   policy {
     xml_content = file(var.apim_policies_path)
   }
-
-  depends_on = [null_resource.module_depends_on]
 }
 
 resource "azurerm_key_vault_access_policy" "apim" {
